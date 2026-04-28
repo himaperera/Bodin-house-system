@@ -393,7 +393,7 @@
         ['name' => 'Signature Studio - NSBM', 'price' => '18,500', 'rating' => '9.8', 'img' => 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=500'],
         ['name' => 'Royal Shared Loft - Malabe', 'price' => '14,000', 'rating' => '8.7', 'img' => 'https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=500'],
         ['name' => 'Eco-Living Villa', 'price' => '22,000', 'rating' => '9.2', 'img' => 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=500'],
-
+        ['name' => 'Eco-Living Villa', 'price' => '22,000', 'rating' => '9.2', 'img' => 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=500'],
       ];
 
       foreach ($rooms as $index => $room):
