@@ -13,7 +13,6 @@
     :root {
       --navy-deep: #020617;
       --navy-tint: rgba(2, 6, 23, 0.85);
-      /* The transparent blue overlay */
       --glass-bg: rgba(255, 255, 255, 0.05);
       --glass-border: rgba(255, 255, 255, 0.12);
       --text-main: #f8fafc;
@@ -22,7 +21,6 @@
       --blue-accent: #38bdf8;
     }
 
-    /* --- Background Image with Blue Transparency --- */
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
@@ -39,7 +37,6 @@
       left: 0;
       width: 100%;
       height: 100%;
-      /* REPLACE the URL below with your local image path */
       background-image: url('https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&q=80&w=1600');
       background-size: cover;
       background-position: center;
@@ -47,7 +44,6 @@
       z-index: -2;
     }
 
-    /* This creates the Transparent Blue Overlay */
     body::after {
       content: "";
       position: fixed;
@@ -57,11 +53,10 @@
       height: 100%;
       background: var(--navy-tint);
       backdrop-filter: blur(4px);
-      /* Slight blur to make text more readable */
       z-index: -1;
     }
 
-    /* --- Navbar (Glass Effect) --- */
+    /* --- Navbar --- */
     .navbar {
       background: rgba(2, 6, 23, 0.6);
       backdrop-filter: blur(15px);
@@ -111,7 +106,8 @@
 
     /* --- Hero Section --- */
     .hero {
-      padding: 80px 40px;
+      padding: 80px 40px 100px 40px;
+      /* Added bottom padding to accommodate search bar */
       text-align: center;
       animation: fadeIn 1s ease;
     }
@@ -146,9 +142,80 @@
       font-size: 1.1rem;
     }
 
+    /* --- New: University Search Bar --- */
+    .search-wrapper {
+      max-width: 800px;
+      margin: -60px auto 40px auto;
+      /* Pulls it up over the hero section */
+      position: relative;
+      z-index: 10;
+      padding: 0 20px;
+    }
+
+    .search-glass-container {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 100px;
+      padding: 10px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .search-input-group {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex: 1;
+      padding: 0 25px;
+      color: var(--blue-accent);
+      font-size: 20px;
+    }
+
+    .search-input-group select {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+    }
+
+    .search-input-group select option {
+      background: var(--navy-deep);
+      color: #fff;
+      padding: 15px;
+    }
+
+    .btn-search {
+      background: var(--blue-accent);
+      color: #000;
+      border: none;
+      padding: 15px 35px;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: 0.3s;
+    }
+
+    .btn-search:hover {
+      background: #fff;
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+    }
+
     /* --- Room Grid & Cards --- */
     .room-container {
-      padding: 40px;
+      padding: 20px 40px 40px;
       max-width: 1300px;
       margin: 0 auto;
     }
@@ -204,6 +271,7 @@
       color: #fff;
     }
 
+    /* --- Buttons --- */
     .btn-primary {
       background: var(--red);
       color: white;
@@ -310,7 +378,6 @@
       color: #fff;
     }
 
-    /* Updated CSS for Exact Social Icons */
     .social-icons {
       display: flex;
       gap: 15px;
@@ -345,6 +412,26 @@
       color: var(--text-muted);
       font-size: 13px;
     }
+
+    /* Mobile Responsive for Search Bar */
+    @media (max-width: 768px) {
+      .search-glass-container {
+        flex-direction: column;
+        border-radius: 20px;
+        padding: 15px;
+        gap: 15px;
+      }
+
+      .btn-search {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .search-input-group {
+        width: 100%;
+        padding: 10px;
+      }
+    }
   </style>
 </head>
 
@@ -375,11 +462,39 @@
     <h1>Modern Living for<br><span>Smart Students</span></h1>
     <p class="hero-sub">The ultimate boarding house management system. Find, book, and stay in the best locations across
       the island.</p>
-    <div style="display: flex; gap: 15px; justify-content: center;">
-      <a href="rooms.php" class="btn-primary">Explore Rooms</a>
-      <a href="#how-it-works" class="btn-outline">How it works</a>
-    </div>
   </section>
+
+  <div class="search-wrapper">
+    <form action="rooms.php" method="GET" class="search-glass-container">
+      <div class="search-input-group">
+        <i class="fa-solid fa-graduation-cap"></i>
+        <select name="university" id="university" required>
+          <option value="" disabled selected>Select your University / Institute...</option>
+          <option value="nsbm">NSBM Green University</option>
+          <option value="colombo">University of Colombo</option>
+          <option value="peradeniya">University of Peradeniya</option>
+          <option value="sjp">University of Sri Jayewardenepura</option>
+          <option value="kelaniya">University of Kelaniya</option>
+          <option value="moratuwa">University of Moratuwa</option>
+          <option value="ruhuna">University of Ruhuna</option>
+          <option value="jaffna">University of Jaffna</option>
+          <option value="rajarata">Rajarata University</option>
+          <option value="wayamba">Wayamba University</option>
+          <option value="sabaragamuwa">Sabaragamuwa University</option>
+          <option value="eastern">Eastern University</option>
+          <option value="south-eastern">South Eastern University</option>
+          <option value="uva-wellassa">Uva Wellassa University</option>
+          <option value="visual-performing-arts">University of the Visual & Performing Arts</option>
+          <option value="open-university">Open University of Sri Lanka</option>
+          <option value="gampaha-wickramarachchi">Gampaha Wickramarachchi University</option>
+          <option value="vavuniya">University of Vavuniya</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-search">
+        <i class="fa-solid fa-magnifying-glass"></i> Search Rooms
+      </button>
+    </form>
+  </div>
 
   <section class="room-container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
@@ -393,7 +508,7 @@
         ['name' => 'Signature Studio - NSBM', 'price' => '18,500', 'rating' => '9.8', 'img' => 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=500'],
         ['name' => 'Royal Shared Loft - Malabe', 'price' => '14,000', 'rating' => '8.7', 'img' => 'https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=500'],
         ['name' => 'Eco-Living Villa', 'price' => '22,000', 'rating' => '9.2', 'img' => 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=500'],
-        ['name' => 'Eco-Living Villa', 'price' => '22,000', 'rating' => '9.2', 'img' => 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=500'],
+        ['name' => 'Eco-Living Villa', 'price' => '22,000', 'rating' => '9.2', 'img' => 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=500']
       ];
 
       foreach ($rooms as $index => $room):
@@ -413,13 +528,13 @@
             <h3 style="margin-bottom: 8px; font-size: 18px;">
               <?= $room['name'] ?>
             </h3>
-            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Western Province • Near NSBM Campus
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Western Province • Premium Location
             </p>
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span class="price-new">LKR
                 <?= $room['price'] ?>
               </span>
-              <a href="#" class="btn-primary" style="padding: 8px 16px; font-size: 12px;">Book Now</a>
+              <a href="rooms.php" class="btn-primary" style="padding: 8px 16px; font-size: 12px;">Book Now</a>
             </div>
           </div>
         </div>
