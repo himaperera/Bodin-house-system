@@ -500,7 +500,7 @@ if (!empty($search_uni)) {
   </section>
 
   <div class="search-wrapper">
-    <form action="rooms.php" method="GET" class="search-glass-container">
+    <form action="search_results.php" method="GET" class="search-glass-container">
       <div class="search-input-group">
         <i class="fa-solid fa-graduation-cap"></i>
         <select name="university" id="university" required>
