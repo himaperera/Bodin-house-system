@@ -152,7 +152,7 @@ $images = json_decode($room['images'], true) ?: ['https://images.unsplash.com/ph
             </nav>
         </aside>
 
-        <!-- MAIN CONTENT -->
+
         <main class="main-content">
             <!-- Page Header -->
             <div class="page-header-row" style="margin-bottom: 24px;">
