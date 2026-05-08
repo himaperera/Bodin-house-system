@@ -25,144 +25,211 @@ $user = $user_query->fetch();
 
 $confirmed = array_filter($bookings, fn($b) => $b['status'] === 'confirmed');
 $pending = array_filter($bookings, fn($b) => $b['status'] === 'pending');
+
+// Fetch Recommended Rooms (Available rooms NOT booked by this user)
+$rec_query = $pdo->prepare("
+  SELECT * FROM rooms 
+  WHERE status = 'available' 
+  AND id NOT IN (SELECT room_id FROM bookings WHERE user_id = ?) 
+  ORDER BY RAND() LIMIT 4
+");
+$rec_query->execute([$userId]);
+$recommendations = $rec_query->fetchAll();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Bookings — BoardingRooms</title>
+  <title>My Dashboard — BoardingRooms</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
   <style>
     :root {
-      /* Exact Colors from your Homepage Hero */
-      --main-bg: #111827;
-      /* Dark foundation */
-      --nav-bg: #1a202c;
-      /* Slightly lighter navy */
-      --card-bg: #1f2937;
-      /* Card color from the homepage hero */
-      --accent-red: #ef4444;
-      /* The "Explore Rooms" Red */
-      --accent-blue: #38bdf8;
-      /* The "Smart Students" Blue */
+      --navy-deep: #020617;
+      --navy-tint: rgba(2, 6, 23, 0.85);
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.12);
       --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border-color: #374151;
-      --success: #22c55e;
+      --text-muted: #cbd5e1;
+      --red: #ef4444;
+      --blue-accent: #38bdf8;
+      --green-accent: #10b981;
       --warning: #fbbf24;
     }
 
     body {
-      background-color: var(--main-bg);
-      /* This mimics the subtle dark gradient seen in your screenshot */
-      background-image: radial-gradient(circle at top right, #1e293b, #111827);
-      color: var(--text-main);
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       margin: 0;
+      font-family: 'Inter', sans-serif;
+      color: var(--text-main);
+      background-color: var(--navy-deep);
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
     }
 
-    /* Navbar with Logo Styling */
-    .page-navbar {
-      background: rgba(17, 24, 39, 0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border-color);
+    /* Background Image & Overlay */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&q=80&w=1600');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      z-index: -2;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--navy-tint);
+      backdrop-filter: blur(8px);
+      z-index: -1;
+    }
+
+    /* --- Navbar --- */
+    .navbar {
+      background: rgba(2, 6, 23, 0.6);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--glass-border);
       padding: 0 40px;
-      height: 75px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      height: 70px;
       position: sticky;
       top: 0;
       z-index: 100;
     }
 
-    .logo-wrap {
+    .navbar-logo {
+      font-size: 22px;
+      font-weight: 800;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
       text-decoration: none;
+      color: #fff;
     }
 
     .logo-pin {
-      width: 38px;
-      height: 38px;
-      background: var(--accent-red);
-      border-radius: 50% 50% 50% 10%;
-      transform: rotate(-45deg);
+      width: 32px;
+      height: 32px;
+      background: var(--red);
+      border-radius: 50% 50% 50% 0;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 14px;
     }
 
-    .logo-pin span {
-      transform: rotate(45deg);
-      font-size: 18px;
-    }
-
-    .logo-text {
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: -1px;
-    }
-
-    .btn-sm {
-      padding: 9px 20px;
-      border-radius: 10px;
+    .navbar-links a {
+      padding: 8px 16px;
+      font-size: 14px;
+      color: var(--text-muted);
       text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .navbar-links a:hover,
+    .navbar-links a.active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .btn-outline-nav {
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: 0.3s;
       font-size: 14px;
       font-weight: 600;
-      transition: 0.2s;
     }
 
-    .btn-primary {
-      background: var(--accent-red);
-      color: #fff;
-    }
-
-    .btn-outline {
-      border: 1px solid var(--border-color);
-      color: #fff;
-      background: rgba(255, 255, 255, 0.05);
+    .btn-outline-nav:hover {
+      background: rgba(255, 255, 255, 0.1);
     }
 
     /* Dashboard Container */
     .my-page {
-      max-width: 1000px;
+      max-width: 1200px;
       margin: 40px auto;
       padding: 0 20px;
+      flex: 1;
+      width: 100%;
+      box-sizing: border-box;
+      animation: fadeIn 0.8s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .user-header {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
       border-radius: 24px;
       padding: 35px;
       display: flex;
       align-items: center;
+      flex-wrap: wrap;
       gap: 25px;
       margin-bottom: 40px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     }
 
     .avatar-lg {
-      width: 75px;
-      height: 75px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
-      background: var(--accent-blue);
-      color: #000;
+      background: linear-gradient(135deg, var(--blue-accent), #8b5cf6);
+      color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 32px;
       font-weight: 900;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .user-info {
+      flex: 1;
+      min-width: 200px;
     }
 
     .user-stats {
-      margin-left: auto;
       display: flex;
-      gap: 40px;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      text-align: center;
     }
 
     .stat-val {
@@ -179,37 +246,91 @@ $pending = array_filter($bookings, fn($b) => $b['status'] === 'pending');
       letter-spacing: 0.5px;
     }
 
+    /* Action Bar */
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .btn-primary {
+      background: var(--red);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: 0.3s;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary:hover {
+      background: #dc2626;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-post-ad {
+      background: var(--blue-accent);
+      color: #000;
+      padding: 10px 20px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 800;
+      transition: 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-post-ad:hover {
+      background: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(56, 189, 248, 0.4);
+    }
+
     /* Booking Cards Styling */
     .booking-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
       border-radius: 18px;
-      padding: 30px;
-      margin-bottom: 24px;
+      padding: 25px;
+      margin-bottom: 20px;
       display: flex;
-      gap: 30px;
-      transition: all 0.2s ease;
+      flex-wrap: wrap;
+      gap: 25px;
+      transition: all 0.3s ease;
     }
 
     .booking-card:hover {
-      border-color: var(--accent-blue);
-      box-shadow: 0 10px 20px rgba(56, 189, 248, 0.1);
+      border-color: var(--blue-accent);
+      background: rgba(255, 255, 255, 0.06);
+      transform: translateY(-3px);
     }
 
     .room-icon {
-      width: 65px;
-      height: 65px;
+      width: 60px;
+      height: 60px;
       border-radius: 14px;
       background: rgba(56, 189, 248, 0.1);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 28px;
-      color: var(--accent-blue);
+      font-size: 24px;
+      color: var(--blue-accent);
+      border: 1px solid rgba(56, 189, 248, 0.2);
     }
 
     .booking-main {
       flex: 1;
+      min-width: 300px;
     }
 
     .room-title {
@@ -219,29 +340,31 @@ $pending = array_filter($bookings, fn($b) => $b['status'] === 'pending');
     }
 
     .room-meta {
-      font-size: 15px;
+      font-size: 14px;
       color: var(--text-muted);
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
     .date-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
     }
 
     .date-label {
       font-size: 11px;
       font-weight: 800;
-      color: var(--accent-blue);
+      color: var(--blue-accent);
       text-transform: uppercase;
       letter-spacing: 0.8px;
+      display: block;
     }
 
     .date-val {
       font-size: 15px;
       font-weight: 600;
       margin-top: 5px;
+      display: block;
     }
 
     .booking-status {
@@ -251,61 +374,158 @@ $pending = array_filter($bookings, fn($b) => $b['status'] === 'pending');
 
     .status-pill {
       display: inline-block;
-      padding: 7px 14px;
-      border-radius: 9px;
+      padding: 6px 12px;
+      border-radius: 50px;
       font-size: 12px;
       font-weight: 800;
       text-transform: uppercase;
     }
 
     .status-confirmed {
-      background: rgba(34, 197, 94, 0.15);
-      color: var(--success);
-      border: 1px solid rgba(34, 197, 94, 0.3);
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--green-accent);
+      border: 1px solid var(--green-accent);
     }
 
     .status-pending {
       background: rgba(251, 191, 36, 0.15);
       color: var(--warning);
-      border: 1px solid rgba(251, 191, 36, 0.3);
+      border: 1px solid var(--warning);
+    }
+
+    .status-cancelled {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ff8a8a;
+      border: 1px solid var(--red);
     }
 
     .price-tag {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 900;
-      color: var(--accent-red);
+      color: #fff;
       margin-top: 15px;
+    }
+
+    /* --- Recommendations Section --- */
+    .recommendations-section {
+      margin-top: 60px;
+      border-top: 1px dashed var(--glass-border);
+      padding-top: 40px;
+    }
+
+    .room-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .rec-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: 0.3s;
+    }
+
+    .rec-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--blue-accent);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .rec-img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+    }
+
+    .rec-content {
+      padding: 15px;
+    }
+
+    .rec-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .rec-price {
+      color: var(--blue-accent);
+      font-weight: 800;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    /* Footer */
+    .site-footer {
+      border-top: 1px solid var(--glass-border);
+      background: rgba(2, 6, 23, 0.7);
+      backdrop-filter: blur(15px);
+      padding: 30px 40px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: auto;
+    }
+
+    @media (max-width: 600px) {
+      .booking-card {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .room-icon {
+        margin: 0 auto;
+      }
+
+      .date-grid {
+        justify-content: center;
+      }
+
+      .booking-status {
+        text-align: center;
+        margin-top: 15px;
+      }
+
+      .user-stats {
+        justify-content: center;
+        width: 100%;
+        margin-top: 20px;
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <nav class="page-navbar">
-    <a href="index.php" class="logo-wrap">
-      <div class="logo-pin"><span>🏠</span></div>
-      <div class="logo-text">
-        <span style="color: var(--accent-red);">boarding</span>
-        <span style="color: #fff;">rooms</span>
-      </div>
+  <nav class="navbar">
+    <a href="index.php" class="navbar-logo">
+      <div class="logo-pin">🏠</div>
+      <span style="color:var(--red)">boarding</span><span>rooms</span>
     </a>
-    <div style="display:flex; gap:12px; align-items:center;">
-      <a href="rooms.php" class="btn-sm btn-outline">Browse Rooms</a>
-      <a href="logout.php"
-        style="color: var(--text-muted); text-decoration:none; font-size: 14px; font-weight:600; margin-left:10px;">Logout</a>
+    <div class="navbar-links">
+      <a href="index.php">Home</a>
+      <a href="rooms.php">Available Rooms</a>
+      <a href="my_bookings.php" class="active">Dashboard</a>
+      <a href="user_profile.php">Profile</a>
+    </div>
+    <div class="navbar-actions">
+      <a href="logout.php" class="btn-outline-nav"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
     </div>
   </nav>
 
   <div class="my-page">
+
     <div class="user-header">
       <div class="avatar-lg">
         <?= strtoupper(substr($user['name'], 0, 1)) ?>
       </div>
-      <div>
-        <h2 style="margin:0; font-size: 24px;">
+      <div class="user-info">
+        <h2 style="margin:0; font-size: 24px; color: #fff;">
           <?= htmlspecialchars($user['name']) ?>
         </h2>
-        <p style="margin:6px 0 0; color: var(--text-muted); font-size: 15px;">Logged in as:
+        <p style="margin:6px 0 0; color: var(--text-muted); font-size: 14px;"><i class="fa-regular fa-envelope"></i>
           <?= htmlspecialchars($user['email']) ?>
         </p>
       </div>
@@ -317,7 +537,7 @@ $pending = array_filter($bookings, fn($b) => $b['status'] === 'pending');
           <div class="stat-label">Total</div>
         </div>
         <div class="stat-item">
-          <div class="stat-val" style="color: var(--success);">
+          <div class="stat-val" style="color: var(--green-accent);">
             <?= count($confirmed) ?>
           </div>
           <div class="stat-label">Active</div>
@@ -331,62 +551,71 @@ $pending = array_filter($bookings, fn($b) => $b['status'] === 'pending');
       </div>
     </div>
 
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-      <h3
-        style="font-size: 24px; font-weight: 800; margin:0; border-left: 4px solid var(--accent-red); padding-left: 15px;">
-        My Bookings</h3>
-      <a href="book.php" class="btn-sm btn-primary">+ New Booking</a>
+    <div class="action-bar">
+      <h3 style="font-size: 22px; font-weight: 800; margin:0; border-left: 4px solid var(--red); padding-left: 15px;">My
+        Bookings</h3>
+      <div style="display: flex; gap: 10px;">
+        <a href="submit_room.php" class="btn-post-ad"><i class="fa-solid fa-bullhorn"></i> Post an Ad</a>
+        <a href="rooms.php" class="btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Find Rooms</a>
+      </div>
     </div>
 
     <?php if (empty($bookings)): ?>
       <div
-        style="background: var(--card-bg); border-radius: 20px; padding: 80px; text-align: center; border: 1px dashed var(--border-color);">
-        <div style="font-size: 48px; margin-bottom: 20px;">🗓️</div>
-        <h3 style="font-size: 22px;">No active bookings</h3>
-        <p style="color: var(--text-muted); margin-bottom: 30px;">Start your journey by finding a comfortable place to
-          stay.</p>
-        <a href="rooms.php" class="btn-sm btn-primary">Browse Available Rooms</a>
+        style="background: rgba(255,255,255,0.03); border-radius: 20px; padding: 60px 20px; text-align: center; border: 1px dashed var(--glass-border);">
+        <i class="fa-regular fa-calendar-xmark"
+          style="font-size: 50px; color: var(--text-muted); margin-bottom: 20px;"></i>
+        <h3 style="font-size: 22px; color: #fff; margin-bottom: 10px;">No active bookings</h3>
+        <p style="color: var(--text-muted); margin-bottom: 25px;">You haven't booked any rooms yet. Start your journey by
+          finding a comfortable place to stay.</p>
       </div>
     <?php else: ?>
       <div class="bookings-list">
         <?php foreach ($bookings as $b):
-          $statusClass = $b['status'] === 'confirmed' ? 'status-confirmed' : 'status-pending';
+          $statusClass = 'status-pending';
+          if ($b['status'] === 'confirmed')
+            $statusClass = 'status-confirmed';
+          if ($b['status'] === 'cancelled')
+            $statusClass = 'status-cancelled';
+
           $months = max(1, round((strtotime($b['check_out']) - strtotime($b['check_in'])) / (30 * 24 * 3600)));
           ?>
           <div class="booking-card">
-            <div class="room-icon">🏠</div>
+            <div class="room-icon"><i class="fa-solid fa-bed"></i></div>
+
             <div class="booking-main">
               <div class="room-title">Room
                 <?= htmlspecialchars($b['room_number']) ?> —
                 <?= htmlspecialchars($b['room_type']) ?>
               </div>
-              <div class="room-meta">Floor
-                <?= htmlspecialchars($b['floor']) ?> ·
+              <div class="room-meta"><i class="fa-solid fa-layer-group"></i> Floor
+                <?= htmlspecialchars($b['floor']) ?> &nbsp;|&nbsp; <i class="fa-solid fa-list-check"></i>
                 <?= htmlspecialchars($b['amenities']) ?>
               </div>
 
               <div class="date-grid">
                 <div class="date-box">
-                  <span class="date-label">Arrival</span>
-                  <span class="date-val">
+                  <span class="date-label">Check-in</span>
+                  <span class="date-val"><i class="fa-regular fa-calendar-check" style="color:var(--text-muted);"></i>
                     <?= date('d M Y', strtotime($b['check_in'])) ?>
                   </span>
                 </div>
                 <div class="date-box">
-                  <span class="date-label">Departure</span>
-                  <span class="date-val">
+                  <span class="date-label">Check-out</span>
+                  <span class="date-val"><i class="fa-regular fa-calendar-xmark" style="color:var(--text-muted);"></i>
                     <?= date('d M Y', strtotime($b['check_out'])) ?>
                   </span>
                 </div>
                 <div class="date-box">
                   <span class="date-label">Duration</span>
-                  <span class="date-val">
+                  <span class="date-val"><i class="fa-regular fa-clock" style="color:var(--text-muted);"></i>
                     <?= $months ?> Month
                     <?= $months > 1 ? 's' : '' ?>
                   </span>
                 </div>
               </div>
             </div>
+
             <div class="booking-status">
               <span class="status-pill <?= $statusClass ?>">
                 <?= ucfirst($b['status']) ?>
@@ -402,7 +631,45 @@ $pending = array_filter($bookings, fn($b) => $b['status'] === 'pending');
         <?php endforeach; ?>
       </div>
     <?php endif; ?>
+
+    <?php if (!empty($recommendations)): ?>
+      <div class="recommendations-section">
+        <h3 style="font-size: 20px; font-weight: 800; margin:0 0 10px 0; color: #fff;"><i class="fa-solid fa-star"
+            style="color:var(--warning);"></i> Recommended For You</h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Based on available rooms near
+          universities.</p>
+
+        <div class="room-grid">
+          <?php foreach ($recommendations as $rec): ?>
+            <div class="rec-card">
+              <img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=400&q=80"
+                class="rec-img" alt="Room Image">
+              <div class="rec-content">
+                <div class="rec-price">Rs.
+                  <?= number_format($rec['price']) ?> <span
+                    style="font-size:12px; font-weight:normal; color:var(--text-muted);">/mo</span>
+                </div>
+                <div class="rec-title">
+                  <?= htmlspecialchars($rec['room_type']) ?>
+                </div>
+                <div style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;"><i
+                    class="fa-solid fa-door-closed"></i> Room
+                  <?= htmlspecialchars($rec['room_number']) ?>
+                </div>
+                <a href="book_room.php?id=<?= $rec['id'] ?>" class="btn-primary"
+                  style="width:100%; justify-content:center; padding: 8px; font-size: 13px;">View Details</a>
+              </div>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+    <?php endif; ?>
+
   </div>
+
+  <footer class="site-footer">
+    &copy; 2026 BoardingRooms. All Rights Reserved.
+  </footer>
 
 </body>
 
