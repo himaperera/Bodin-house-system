@@ -6,6 +6,15 @@ if (!isset($_SESSION['user_id'])) {
 }
 require_once 'db.php';
 $userId = $_SESSION['user_id'];
+// Fetch User Notifications
+$notif_query = $pdo->prepare("SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 5");
+$notif_query->execute([$userId]);
+$notifications = $notif_query->fetchAll();
+
+// Fetch User's Posted Ads
+$my_ads_query = $pdo->prepare("SELECT * FROM rooms WHERE submitted_by = ? ORDER BY created_at DESC");
+$my_ads_query->execute([$userId]);
+$my_ads = $my_ads_query->fetchAll();
 
 // Fetch Bookings with Room Details
 $bookings_query = $pdo->prepare("
