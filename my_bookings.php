@@ -523,6 +523,45 @@ $recommendations = $rec_query->fetchAll();
       <a href="logout.php" class="btn-outline-nav"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
     </div>
   </nav>
+  <?php if (!empty($notifications)): ?>
+    <div style="margin-bottom: 40px;">
+      <h3 style="border-left: 4px solid var(--warning); padding-left: 10px;">Notifications</h3>
+      <?php foreach ($notifications as $n): ?>
+        <div
+          style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--glass-border);">
+          <strong style="color: var(--blue-accent);"><?= htmlspecialchars($n['title']) ?></strong>
+          <p style="margin: 5px 0 0 0; font-size: 14px; color: var(--text-muted);"><?= htmlspecialchars($n['message']) ?>
+          </p>
+        </div>
+      <?php endforeach; ?>
+    </div>
+  <?php endif; ?>
+
+  <div style="margin-bottom: 40px;">
+    <h3 style="border-left: 4px solid var(--green-accent); padding-left: 10px;">My Posted Ads</h3>
+    <?php if (empty($my_ads)): ?>
+      <p style="color: var(--text-muted);">You haven't posted any ads yet.</p>
+    <?php else: ?>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+        <?php foreach ($my_ads as $ad):
+          $adStatusColor = ($ad['status'] == 'pending_approval') ? 'var(--warning)' : 'var(--green-accent)';
+          $displayStatus = ($ad['status'] == 'pending_approval') ? 'Pending Approval' : 'Posted / Active';
+          ?>
+          <div
+            style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; border: 1px solid var(--glass-border);">
+            <h4 style="margin: 0 0 10px 0;"><?= htmlspecialchars($ad['room_type']) ?>
+              (<?= htmlspecialchars($ad['room_number']) ?>)</h4>
+            <p style="margin: 0 0 15px 0; font-size: 14px; color: var(--text-muted);">Price: Rs.
+              <?= number_format($ad['price']) ?></p>
+            <span
+              style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 50px; font-size: 12px; font-weight: bold; color: <?= $adStatusColor ?>;">
+              <?= $displayStatus ?>
+            </span>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
+  </div>
 
   <div class="my-page">
 
@@ -647,6 +686,45 @@ $recommendations = $rec_query->fetchAll();
             style="color:var(--warning);"></i> Recommended For You</h3>
         <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Based on available rooms near
           universities.</p>
+        <?php if (!empty($notifications)): ?>
+          <div style="margin-bottom: 40px;">
+            <h3 style="border-left: 4px solid var(--warning); padding-left: 10px;">Notifications</h3>
+            <?php foreach ($notifications as $n): ?>
+              <div
+                style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--glass-border);">
+                <strong style="color: var(--blue-accent);"><?= htmlspecialchars($n['title']) ?></strong>
+                <p style="margin: 5px 0 0 0; font-size: 14px; color: var(--text-muted);">
+                  <?= htmlspecialchars($n['message']) ?></p>
+              </div>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
+
+        <div style="margin-bottom: 40px;">
+          <h3 style="border-left: 4px solid var(--green-accent); padding-left: 10px;">My Posted Ads</h3>
+          <?php if (empty($my_ads)): ?>
+            <p style="color: var(--text-muted);">You haven't posted any ads yet.</p>
+          <?php else: ?>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+              <?php foreach ($my_ads as $ad):
+                $adStatusColor = ($ad['status'] == 'pending_approval') ? 'var(--warning)' : 'var(--green-accent)';
+                $displayStatus = ($ad['status'] == 'pending_approval') ? 'Pending Approval' : 'Posted / Active';
+                ?>
+                <div
+                  style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; border: 1px solid var(--glass-border);">
+                  <h4 style="margin: 0 0 10px 0;"><?= htmlspecialchars($ad['room_type']) ?>
+                    (<?= htmlspecialchars($ad['room_number']) ?>)</h4>
+                  <p style="margin: 0 0 15px 0; font-size: 14px; color: var(--text-muted);">Price: Rs.
+                    <?= number_format($ad['price']) ?></p>
+                  <span
+                    style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 50px; font-size: 12px; font-weight: bold; color: <?= $adStatusColor ?>;">
+                    <?= $displayStatus ?>
+                  </span>
+                </div>
+              <?php endforeach; ?>
+            </div>
+          <?php endif; ?>
+        </div>
 
         <div class="room-grid">
           <?php foreach ($recommendations as $rec): ?>
