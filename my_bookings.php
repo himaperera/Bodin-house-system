@@ -6,6 +6,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 require_once 'db.php';
 $userId = $_SESSION['user_id'];
+
 // Fetch User Notifications
 $notif_query = $pdo->prepare("SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 5");
 $notif_query->execute([$userId]);
@@ -53,9 +54,7 @@ $recommendations = $rec_query->fetchAll();
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Dashboard — BoardingRooms</title>
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
   <style>
     :root {
       --navy-deep: #020617;
@@ -508,6 +507,7 @@ $recommendations = $rec_query->fetchAll();
 
 <body>
 
+  <!-- Navigation Bar -->
   <nav class="navbar">
     <a href="index.php" class="navbar-logo">
       <div class="logo-pin">🏠</div>
@@ -523,48 +523,11 @@ $recommendations = $rec_query->fetchAll();
       <a href="logout.php" class="btn-outline-nav"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
     </div>
   </nav>
-  <?php if (!empty($notifications)): ?>
-    <div style="margin-bottom: 40px;">
-      <h3 style="border-left: 4px solid var(--warning); padding-left: 10px;">Notifications</h3>
-      <?php foreach ($notifications as $n): ?>
-        <div
-          style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--glass-border);">
-          <strong style="color: var(--blue-accent);"><?= htmlspecialchars($n['title']) ?></strong>
-          <p style="margin: 5px 0 0 0; font-size: 14px; color: var(--text-muted);"><?= htmlspecialchars($n['message']) ?>
-          </p>
-        </div>
-      <?php endforeach; ?>
-    </div>
-  <?php endif; ?>
 
-  <div style="margin-bottom: 40px;">
-    <h3 style="border-left: 4px solid var(--green-accent); padding-left: 10px;">My Posted Ads</h3>
-    <?php if (empty($my_ads)): ?>
-      <p style="color: var(--text-muted);">You haven't posted any ads yet.</p>
-    <?php else: ?>
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
-        <?php foreach ($my_ads as $ad):
-          $adStatusColor = ($ad['status'] == 'pending_approval') ? 'var(--warning)' : 'var(--green-accent)';
-          $displayStatus = ($ad['status'] == 'pending_approval') ? 'Pending Approval' : 'Posted / Active';
-          ?>
-          <div
-            style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; border: 1px solid var(--glass-border);">
-            <h4 style="margin: 0 0 10px 0;"><?= htmlspecialchars($ad['room_type']) ?>
-              (<?= htmlspecialchars($ad['room_number']) ?>)</h4>
-            <p style="margin: 0 0 15px 0; font-size: 14px; color: var(--text-muted);">Price: Rs.
-              <?= number_format($ad['price']) ?></p>
-            <span
-              style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 50px; font-size: 12px; font-weight: bold; color: <?= $adStatusColor ?>;">
-              <?= $displayStatus ?>
-            </span>
-          </div>
-        <?php endforeach; ?>
-      </div>
-    <?php endif; ?>
-  </div>
-
+  <!-- Main Dashboard Content -->
   <div class="my-page">
 
+    <!-- 1. User Header Section -->
     <div class="user-header">
       <div class="avatar-lg">
         <?= strtoupper(substr($user['name'], 0, 1)) ?>
@@ -573,7 +536,8 @@ $recommendations = $rec_query->fetchAll();
         <h2 style="margin:0; font-size: 24px; color: #fff;">
           <?= htmlspecialchars($user['name']) ?>
         </h2>
-        <p style="margin:6px 0 0; color: var(--text-muted); font-size: 14px;"><i class="fa-regular fa-envelope"></i>
+        <p style="margin:6px 0 0; color: var(--text-muted); font-size: 14px;">
+          <i class="fa-regular fa-envelope"></i>
           <?= htmlspecialchars($user['email']) ?>
         </p>
       </div>
@@ -599,18 +563,39 @@ $recommendations = $rec_query->fetchAll();
       </div>
     </div>
 
+    <!-- 2. Notifications Section -->
+    <?php if (!empty($notifications)): ?>
+      <div style="margin-bottom: 40px;">
+        <h3 style="border-left: 4px solid var(--warning); padding-left: 10px; margin-top: 0;">Notifications</h3>
+        <?php foreach ($notifications as $n): ?>
+          <div
+            style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--glass-border);">
+            <strong style="color: var(--blue-accent);">
+              <?= htmlspecialchars($n['title']) ?>
+            </strong>
+            <p style="margin: 5px 0 0 0; font-size: 14px; color: var(--text-muted);">
+              <?= htmlspecialchars($n['message']) ?>
+            </p>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
+
+    <!-- 3. Action Bar (Bookings Title & Buttons) -->
     <div class="action-bar">
-      <h3 style="font-size: 22px; font-weight: 800; margin:0; border-left: 4px solid var(--red); padding-left: 15px;">My
-        Bookings</h3>
+      <h3 style="font-size: 22px; font-weight: 800; margin:0; border-left: 4px solid var(--red); padding-left: 15px;">
+        My Bookings
+      </h3>
       <div style="display: flex; gap: 10px;">
         <a href="submit_room.php" class="btn-post-ad"><i class="fa-solid fa-bullhorn"></i> Post an Ad</a>
         <a href="rooms.php" class="btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Find Rooms</a>
       </div>
     </div>
 
+    <!-- Bookings List -->
     <?php if (empty($bookings)): ?>
       <div
-        style="background: rgba(255,255,255,0.03); border-radius: 20px; padding: 60px 20px; text-align: center; border: 1px dashed var(--glass-border);">
+        style="background: rgba(255,255,255,0.03); border-radius: 20px; padding: 60px 20px; text-align: center; border: 1px dashed var(--glass-border); margin-bottom: 40px;">
         <i class="fa-regular fa-calendar-xmark"
           style="font-size: 50px; color: var(--text-muted); margin-bottom: 20px;"></i>
         <h3 style="font-size: 22px; color: #fff; margin-bottom: 10px;">No active bookings</h3>
@@ -618,29 +603,28 @@ $recommendations = $rec_query->fetchAll();
           finding a comfortable place to stay.</p>
       </div>
     <?php else: ?>
-      <div class="bookings-list">
+      <div class="bookings-list" style="margin-bottom: 40px;">
         <?php foreach ($bookings as $b):
           $statusClass = 'status-pending';
           if ($b['status'] === 'confirmed')
             $statusClass = 'status-confirmed';
           if ($b['status'] === 'cancelled')
             $statusClass = 'status-cancelled';
-
           $months = max(1, round((strtotime($b['check_out']) - strtotime($b['check_in'])) / (30 * 24 * 3600)));
           ?>
           <div class="booking-card">
             <div class="room-icon"><i class="fa-solid fa-bed"></i></div>
-
             <div class="booking-main">
               <div class="room-title">Room
                 <?= htmlspecialchars($b['room_number']) ?> —
                 <?= htmlspecialchars($b['room_type']) ?>
               </div>
-              <div class="room-meta"><i class="fa-solid fa-layer-group"></i> Floor
-                <?= htmlspecialchars($b['floor']) ?> &nbsp;|&nbsp; <i class="fa-solid fa-list-check"></i>
+              <div class="room-meta">
+                <i class="fa-solid fa-layer-group"></i> Floor
+                <?= htmlspecialchars($b['floor']) ?> &nbsp;|&nbsp;
+                <i class="fa-solid fa-list-check"></i>
                 <?= htmlspecialchars($b['amenities']) ?>
               </div>
-
               <div class="date-grid">
                 <div class="date-box">
                   <span class="date-label">Check-in</span>
@@ -663,7 +647,6 @@ $recommendations = $rec_query->fetchAll();
                 </div>
               </div>
             </div>
-
             <div class="booking-status">
               <span class="status-pill <?= $statusClass ?>">
                 <?= ucfirst($b['status']) ?>
@@ -680,51 +663,44 @@ $recommendations = $rec_query->fetchAll();
       </div>
     <?php endif; ?>
 
+    <!-- 4. My Posted Ads Section -->
+    <div style="margin-bottom: 40px;">
+      <h3 style="border-left: 4px solid var(--green-accent); padding-left: 10px;">My Posted Ads</h3>
+      <?php if (empty($my_ads)): ?>
+        <p style="color: var(--text-muted);">You haven't posted any ads yet.</p>
+      <?php else: ?>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+          <?php foreach ($my_ads as $ad):
+            $adStatusColor = ($ad['status'] == 'pending_approval') ? 'var(--warning)' : 'var(--green-accent)';
+            $displayStatus = ($ad['status'] == 'pending_approval') ? 'Pending Approval' : 'Posted / Active';
+            ?>
+            <div
+              style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; border: 1px solid var(--glass-border);">
+              <h4 style="margin: 0 0 10px 0;">
+                <?= htmlspecialchars($ad['room_type']) ?> (
+                <?= htmlspecialchars($ad['room_number']) ?>)
+              </h4>
+              <p style="margin: 0 0 15px 0; font-size: 14px; color: var(--text-muted);">Price: Rs.
+                <?= number_format($ad['price']) ?>
+              </p>
+              <span
+                style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 50px; font-size: 12px; font-weight: bold; color: <?= $adStatusColor ?>;">
+                <?= $displayStatus ?>
+              </span>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
+    </div>
+
+    <!-- 5. Recommendations Section -->
     <?php if (!empty($recommendations)): ?>
       <div class="recommendations-section">
-        <h3 style="font-size: 20px; font-weight: 800; margin:0 0 10px 0; color: #fff;"><i class="fa-solid fa-star"
-            style="color:var(--warning);"></i> Recommended For You</h3>
+        <h3 style="font-size: 20px; font-weight: 800; margin:0 0 10px 0; color: #fff;">
+          <i class="fa-solid fa-star" style="color:var(--warning);"></i> Recommended For You
+        </h3>
         <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Based on available rooms near
           universities.</p>
-        <?php if (!empty($notifications)): ?>
-          <div style="margin-bottom: 40px;">
-            <h3 style="border-left: 4px solid var(--warning); padding-left: 10px;">Notifications</h3>
-            <?php foreach ($notifications as $n): ?>
-              <div
-                style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--glass-border);">
-                <strong style="color: var(--blue-accent);"><?= htmlspecialchars($n['title']) ?></strong>
-                <p style="margin: 5px 0 0 0; font-size: 14px; color: var(--text-muted);">
-                  <?= htmlspecialchars($n['message']) ?></p>
-              </div>
-            <?php endforeach; ?>
-          </div>
-        <?php endif; ?>
-
-        <div style="margin-bottom: 40px;">
-          <h3 style="border-left: 4px solid var(--green-accent); padding-left: 10px;">My Posted Ads</h3>
-          <?php if (empty($my_ads)): ?>
-            <p style="color: var(--text-muted);">You haven't posted any ads yet.</p>
-          <?php else: ?>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
-              <?php foreach ($my_ads as $ad):
-                $adStatusColor = ($ad['status'] == 'pending_approval') ? 'var(--warning)' : 'var(--green-accent)';
-                $displayStatus = ($ad['status'] == 'pending_approval') ? 'Pending Approval' : 'Posted / Active';
-                ?>
-                <div
-                  style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 15px; border: 1px solid var(--glass-border);">
-                  <h4 style="margin: 0 0 10px 0;"><?= htmlspecialchars($ad['room_type']) ?>
-                    (<?= htmlspecialchars($ad['room_number']) ?>)</h4>
-                  <p style="margin: 0 0 15px 0; font-size: 14px; color: var(--text-muted);">Price: Rs.
-                    <?= number_format($ad['price']) ?></p>
-                  <span
-                    style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 50px; font-size: 12px; font-weight: bold; color: <?= $adStatusColor ?>;">
-                    <?= $displayStatus ?>
-                  </span>
-                </div>
-              <?php endforeach; ?>
-            </div>
-          <?php endif; ?>
-        </div>
 
         <div class="room-grid">
           <?php foreach ($recommendations as $rec): ?>
@@ -739,8 +715,8 @@ $recommendations = $rec_query->fetchAll();
                 <div class="rec-title">
                   <?= htmlspecialchars($rec['room_type']) ?>
                 </div>
-                <div style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;"><i
-                    class="fa-solid fa-door-closed"></i> Room
+                <div style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">
+                  <i class="fa-solid fa-door-closed"></i> Room
                   <?= htmlspecialchars($rec['room_number']) ?>
                 </div>
                 <a href="book_room.php?id=<?= $rec['id'] ?>" class="btn-primary"
@@ -752,8 +728,9 @@ $recommendations = $rec_query->fetchAll();
       </div>
     <?php endif; ?>
 
-  </div>
+  </div> <!-- End of .my-page container -->
 
+  <!-- Footer -->
   <footer class="site-footer">
     &copy; 2026 BoardingRooms. All Rights Reserved.
   </footer>
