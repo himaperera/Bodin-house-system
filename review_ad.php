@@ -214,7 +214,7 @@ $images = json_decode($room['images'], true) ?: ['https://images.unsplash.com/ph
                     </div>
                 </div>
 
-                <!-- RIGHT COLUMN: Admin Action Box -->
+
                 <div>
                     <div class="card" style="border-top: 4px solid var(--blue-accent); position: sticky; top: 90px;">
                         <div class="card-header" style="border-bottom: none; padding-bottom: 0;">
