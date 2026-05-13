@@ -360,7 +360,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <div class="logo-pin">🏠</div>
       <span style="color:var(--red)">boarding</span><span>rooms</span>
     </a>
-    <a href="register.php" class="btn-outline-nav">Create Account</a>
+    <!-- Grouping buttons to the right -->
+    <div style="display: flex; gap: 10px;">
+      <a href="index.php" class="btn-outline-nav">
+        <i class="fa-solid fa-house" style="margin-right: 5px;"></i> Home
+      </a>
+      <a href="register.php" class="btn-outline-nav" style="background: var(--red); border: none;">
+        Create Account
+      </a>
+    </div>
   </nav>
 
   <div class="auth-wrap">
