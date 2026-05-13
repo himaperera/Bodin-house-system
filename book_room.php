@@ -2,7 +2,7 @@
 session_start();
 require_once 'db.php';
 
-// URL එකෙන් Room ID එක ලබා ගැනීම
+
 if (!isset($_GET['id'])) {
     header('Location: rooms.php');
     exit;
@@ -12,7 +12,7 @@ $room_id = $_GET['id'];
 $error = '';
 $success = '';
 
-// බෝඩිමේ සම්පූර්ණ විස්තර සහ විශ්වවිද්‍යාලයේ නම ලබා ගැනීම
+
 $stmt = $pdo->prepare("
     SELECT r.*, u.name as uni_name 
     FROM rooms r 
@@ -26,15 +26,15 @@ if (!$room) {
     die("Room not found!");
 }
 
-// Database එකේ ඇති පින්තූර Array එකක් ලෙස ලබා ගැනීම (JSON decode කිරීම)
+
 $images = json_decode($room['images'], true);
 
-// පින්තූර නොමැති නම් පෙන්වීමට Default පින්තූරයක් තැබීම
+
 if (empty($images) || !is_array($images)) {
     $images = ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80'];
 }
 
-// Booking එක Submit කළ විට
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($_SESSION['user_id'])) {
         $error = "You must be logged in to book a room.";
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $check_in = $_POST['check_in'];
         $check_out = $_POST['check_out'];
 
-        // මාස ගණන ගණනය කර මුළු මුදල (Amount) සෑදීම
+
         $datetime1 = new DateTime($check_in);
         $datetime2 = new DateTime($check_out);
         $interval = $datetime1->diff($datetime2);
@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $book_stmt->execute([$user_id, $room_id, $check_in, $check_out, $total_amount]);
             $success = "Your booking request has been sent! Please wait for confirmation.";
 
-            // අවශ්‍ය නම් room එකේ status එක 'reserved' කරන්න පුළුවන් (දැනට available ලෙසම තබමු)
+
         } catch (PDOException $e) {
             $error = "Failed to process booking. Try again.";
         }
@@ -544,10 +544,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script>
         function changeImage(element, imageUrl) {
-            // ප්‍රධාන පින්තූරය මාරු කිරීම
+
             document.getElementById('mainImage').src = imageUrl;
 
-            // Thumbnail වල active class එක මාරු කිරීම
+
             let thumbnails = document.querySelectorAll('.thumbnail');
             thumbnails.forEach(thumb => thumb.classList.remove('active'));
             element.classList.add('active');
