@@ -1,6 +1,6 @@
 <?php
 session_start();
-// ලොග් වී නොමැති නම් Login පිටුවට යවන්න
+
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
@@ -11,7 +11,6 @@ require_once 'db.php';
 $error = '';
 $success = '';
 
-// විශ්වවිද්‍යාල ලැයිස්තුව Dropdown එකට ලබා ගැනීම
 $stmt_uni = $pdo->query("SELECT * FROM universities ORDER BY name ASC");
 $universities = $stmt_uni->fetchAll();
 
@@ -26,11 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $amenities = trim($_POST['amenities']);
     $description = trim($_POST['description']);
     $submitted_by = $_SESSION['user_id'];
-    $status = 'pending_approval'; // Admin approve කරනකම් pending
+    $status = 'pending_approval';
 
-    // පින්තූර Upload කිරීමේ ක්‍රියාවලිය
+
     $uploaded_images = [];
-    $upload_dir = 'uploads/'; // අනිවාර්යයෙන්ම මේ ෆෝල්ඩරය හදලා තියෙන්න ඕනේ
+    $upload_dir = 'uploads/';
 
     if (!empty($_FILES['room_images']['name'][0])) {
         $file_count = count($_FILES['room_images']['name']);
@@ -56,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    $images_json = json_encode($uploaded_images); // පින්තූර වල paths JSON විදිහට DB එකේ save කරනවා
+    $images_json = json_encode($uploaded_images);
 
     if (empty($error)) {
         try {
@@ -67,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$room_number, $university_id, $distance, $room_type, $floor, $capacity, $price, $amenities, $description, $submitted_by, $status, $images_json]);
             $success = "Your Ad has been submitted successfully! It will be visible after admin approval.";
         } catch (PDOException $e) {
-            if ($e->getCode() == 23000) { // Duplicate Room Number
+            if ($e->getCode() == 23000) {
                 $error = "This Room Number already exists in the system.";
             } else {
                 $error = "Something went wrong. Please try again.";
