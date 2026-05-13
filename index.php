@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// වෙනම ඇති db.php ගොනුව මෙතැනට සම්බන්ධ කිරීම
 require_once 'db.php';
 
 // --- Fetch Universities for Dropdown ---
@@ -14,7 +13,7 @@ $section_title = "Featured Rooms";
 $featured_rooms = [];
 
 if (!empty($search_uni)) {
-  // Search කරන ලද විශ්වවිද්‍යාලයට අදාළ බෝඩිං ලබාගැනීම
+
   $sql = "SELECT r.*, u.name as uni_name, u.location 
             FROM rooms r 
             JOIN universities u ON r.university_id = u.id 
@@ -24,7 +23,7 @@ if (!empty($search_uni)) {
   $featured_rooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
   $section_title = "Search Results";
 } else {
-  // Search කර නොමැති විට පෙන්වන සාමාන්‍ය බෝඩිං (Available පමණක්)
+
   $sql = "SELECT r.*, u.name as uni_name, u.location 
             FROM rooms r 
             LEFT JOIN universities u ON r.university_id = u.id 
