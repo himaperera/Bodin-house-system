@@ -1,17 +1,17 @@
 <?php
 session_start();
-require_once 'db.php'; // ඔබගේ Database Connection ගොනුව
+require_once 'db.php';
 
-// Search කර ඇති විශ්වවිද්‍යාලය ලබා ගැනීම
+
 $search_uni = isset($_GET['university']) ? $_GET['university'] : '';
 
-// Search කර නොමැති නම් ආපසු index පිටුවට යැවීම
+
 if (empty($search_uni)) {
     header("Location: index.php");
     exit;
 }
 
-// විශ්වවිද්‍යාලයේ විස්තර ලබා ගැනීම
+
 $stmt_uni = $pdo->prepare("SELECT * FROM universities WHERE short_code = :short_code");
 $stmt_uni->execute(['short_code' => $search_uni]);
 $university = $stmt_uni->fetch();
@@ -20,7 +20,7 @@ if (!$university) {
     die("Invalid University Selected!");
 }
 
-// අදාළ විශ්වවිද්‍යාලය අවට ඇති සියලුම බෝඩිං ලබා ගැනීම (දුර අනුව පෙළගස්වා ඇත)
+
 $sql = "SELECT r.* FROM rooms r 
         WHERE r.university_id = :uni_id AND r.status = 'available' 
         ORDER BY r.distance_from_uni_km ASC";
@@ -28,7 +28,7 @@ $stmt_rooms = $pdo->prepare($sql);
 $stmt_rooms->execute(['uni_id' => $university['id']]);
 $rooms = $stmt_rooms->fetchAll();
 
-// පරිශීලකයා Login වී ඇත්දැයි පරීක්ෂා කිරීම (ඔබගේ login script එකේ session variable එක 'user_id' යැයි උපකල්පනය කර ඇත)
+
 $is_logged_in = isset($_SESSION['user_id']);
 ?>
 
