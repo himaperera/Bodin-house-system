@@ -2,7 +2,7 @@
 session_start();
 require_once 'db.php';
 
-// පරිශීලකයා ලොග් වී නොමැති නම් Login පිටුවට යවන්න
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
@@ -12,7 +12,7 @@ $user_id = $_SESSION['user_id'];
 $success_msg = '';
 $error_msg = '';
 
-// Form එක Submit කළ විට දත්ත Update කිරීම
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name']);
     $phone = trim($_POST['phone']);
@@ -20,12 +20,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         if (!empty($new_password)) {
-            // Password එකත් අලුතින් දීලා නම්, ඒකත් update කරන්න (Hash කරලා)
+
             $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
             $update_stmt = $pdo->prepare("UPDATE users SET name = ?, phone = ?, password = ? WHERE id = ?");
             $update_stmt->execute([$name, $phone, $hashed_password, $user_id]);
         } else {
-            // Password එක වෙනස් කරන්නේ නැති නම් නම සහ දුරකථන අංකය පමණක් update කරන්න
+
             $update_stmt = $pdo->prepare("UPDATE users SET name = ?, phone = ? WHERE id = ?");
             $update_stmt->execute([$name, $phone, $user_id]);
         }
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// දැනට පවතින පරිශීලක දත්ත ලබා ගැනීම (Form එකේ පෙන්වීමට)
+
 $stmt = $pdo->prepare("SELECT name, email, phone FROM users WHERE id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch();
